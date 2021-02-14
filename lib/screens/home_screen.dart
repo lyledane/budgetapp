@@ -5,13 +5,16 @@ import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/category_screen.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
+import 'Add.dart';
 
 class HomeScreen extends StatefulWidget {
+  
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+   final List<Category> _userTransactions = [];
   _buildCategory(Category category, double totalAmountSpent) {
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -96,6 +99,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+     void  _startAddNewTransaction(BuildContext ctx){
+    showModalBottomSheet(
+      context: ctx, 
+      builder:(_){
+      return NewTransaction( _addNewTransaction);
+      }
+    );           
+   }
+  
+    void _addNewTransaction(String catname, amount)
+    {
+      final Category cat = Category(
+        name: catname,
+        maxAmount: amount,
+        id: _userTransactions.length.toString());
+        setState(() {
+          _userTransactions.add(cat);
+        });
+      
+    }
+
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: Icon(Icons.add),
                 iconSize: 30.0,
-                onPressed: () {},
+                onPressed: () {
+                  _startAddNewTransaction(context);
+                },
               ),
             ],
           ),
