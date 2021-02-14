@@ -1,9 +1,8 @@
-import 'package:flutter_budget_ui/models/expense_model.dart';
-
 class Category {
+  final int catId;
   final String name;
   final double maxAmount;
-  final List<Expense> expenses;
+  final double spentAmount;
 
-  Category({this.name, this.maxAmount, this.expenses});
+  Category({this.spentAmount, this.catId, this.name, this.maxAmount});
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 Color getColor(BuildContext context, double percent) {

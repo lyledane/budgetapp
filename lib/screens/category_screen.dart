@@ -4,11 +4,11 @@ import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/widgets/radial_painter.dart';
 
-
 class CategoryScreen extends StatefulWidget {
-  final Category category;
-
-  CategoryScreen({this.category});
+  final List<Expense> catItems;
+  final Category catDetails;
+  const CategoryScreen({Key key, this.catItems, this.catDetails})
+      : super(key: key);
 
   @override
   _CategoryScreenState createState() => _CategoryScreenState();
@@ -17,7 +17,7 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   _buildExpenses() {
     List<Widget> expenseList = [];
-    widget.category.expenses.forEach((Expense expense) {
+    widget.catItems.forEach((Expense expense) {
       expenseList.add(Container(
         alignment: Alignment.center,
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -40,14 +40,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                expense.name,
+                expense.itemName,
                 style: TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '-\$${expense.cost.toStringAsFixed(2)}',
+                '-\$${expense.itemCost.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 20.0,
@@ -66,16 +66,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double totalAmountSpent = 0;
-    widget.category.expenses.forEach((Expense expense) {
-      totalAmountSpent += expense.cost;
-    });
-    final double amountLeft = widget.category.maxAmount - totalAmountSpent;
-    final double percent = amountLeft / widget.category.maxAmount;
+    //double totalAmountSpent = widget.catDetails.spentAmount;
+    final double amountLeft =
+        widget.catDetails.maxAmount - widget.catDetails.spentAmount;
+    final double percent = amountLeft / widget.catDetails.maxAmount;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.category.name),
+        title: Text(widget.catDetails.name),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add),
@@ -112,7 +110,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    '\$${amountLeft.toStringAsFixed(2)} / \$${widget.category.maxAmount}',
+                    '\$${amountLeft.toStringAsFixed(2)} / \$${widget.catDetails.maxAmount}',
                     style: TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w600,

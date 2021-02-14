@@ -1,18 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
+import 'package:flutter_budget_ui/models/expense_model.dart';
+import 'package:intl/intl.dart';
 
-class BarChart extends StatelessWidget {
-  final List<double> expenses;
+class BarChart extends StatefulWidget {
+  @override
+  _BarChartState createState() => _BarChartState();
+}
 
-  BarChart(this.expenses);
+class _BarChartState extends State<BarChart> {
+  DateTime date = DateTime.now();
+  @override
+  void initState() {
+    while (date.weekday != DateTime.saturday) {
+      date = date.add(Duration(days: 1));
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     double mostExpensive = 0;
-    expenses.forEach((double price) {
-      if (price > mostExpensive) {
-        mostExpensive = price;
+    List<double> expenses = [];
+    List<Expense> week = dummyDataExpense;
+    DateTime dateTrav = date;
+
+    for (var i = 0; i < 7; i++) {
+      double sum = 0;
+      for (var a = 0; a < week.length; a++) {
+        if (DateFormat.MMMd('en_US').format(dateTrav) ==
+            DateFormat.MMMd('en_US').format(week[a].datePurchased))
+          sum += week[a].itemCost;
       }
-    });
+      if (sum > mostExpensive) {
+        mostExpensive = sum;
+      }
+      expenses.add(sum);
+      dateTrav = dateTrav.subtract(Duration(days: 1));
+    }
 
     return Padding(
       padding: EdgeInsets.all(12.0),
@@ -33,10 +58,17 @@ class BarChart extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.arrow_back),
                 iconSize: 30.0,
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    date = date.subtract(Duration(days: 7));
+                  });
+                },
               ),
               Text(
-                'feb 10, 2021 - Feb 16, 2021',
+                DateFormat.MMMd('en_US')
+                        .format(dateTrav.add(Duration(days: 1))) +
+                    ' - ' +
+                    DateFormat.MMMd('en_US').format(date),
                 style: TextStyle(
                   fontSize: 14.0,
                   fontWeight: FontWeight.w600,
@@ -46,7 +78,11 @@ class BarChart extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.arrow_forward),
                 iconSize: 30.0,
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    date = date.add(Duration(days: 7));
+                  });
+                },
               ),
             ],
           ),
@@ -57,17 +93,17 @@ class BarChart extends StatelessWidget {
             children: <Widget>[
               Bar(
                 label: 'Su',
-                amountSpent: expenses[0],
+                amountSpent: expenses[6],
                 mostExpensive: mostExpensive,
               ),
               Bar(
                 label: 'Mo',
-                amountSpent: expenses[1],
+                amountSpent: expenses[5],
                 mostExpensive: mostExpensive,
               ),
               Bar(
                 label: 'Tu',
-                amountSpent: expenses[2],
+                amountSpent: expenses[4],
                 mostExpensive: mostExpensive,
               ),
               Bar(
@@ -77,17 +113,17 @@ class BarChart extends StatelessWidget {
               ),
               Bar(
                 label: 'Th',
-                amountSpent: expenses[4],
+                amountSpent: expenses[2],
                 mostExpensive: mostExpensive,
               ),
               Bar(
                 label: 'Fr',
-                amountSpent: expenses[5],
+                amountSpent: expenses[1],
                 mostExpensive: mostExpensive,
               ),
               Bar(
                 label: 'Sa',
-                amountSpent: expenses[6],
+                amountSpent: expenses[0],
                 mostExpensive: mostExpensive,
               ),
             ],
@@ -109,7 +145,11 @@ class Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final barHeight = amountSpent / mostExpensive * _maxBarHeight;
+    double barHeight;
+    if (mostExpensive != 0)
+      barHeight = amountSpent / mostExpensive * _maxBarHeight;
+    else
+      barHeight = 0;
     return Column(
       children: <Widget>[
         Text(
@@ -119,14 +159,7 @@ class Bar extends StatelessWidget {
           ),
         ),
         SizedBox(height: 6.0),
-        Container(
-          height: barHeight,
-          width: 18.0,
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-        ),
+        _getbarHeight(barHeight, context),
         SizedBox(height: 8.0),
         Text(
           label,
@@ -137,5 +170,19 @@ class Bar extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _getbarHeight(barHeight, context) {
+    if (barHeight != 0) {
+      return Container(
+        height: barHeight,
+        width: 18.0,
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+      );
+    } else
+      return Container(height: 150.0);
   }
 }

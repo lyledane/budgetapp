@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_budget_ui/data/data.dart';
+import 'package:flutter_budget_ui/data/dummy_data.dart';
+import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
@@ -12,12 +13,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  _buildCategory(Category category, double totalAmountSpent) {
+  List<Expense> _catItems(catId) {
+    List<Expense> items = [];
+    dummyDataExpense.forEach((Expense expense) {
+      if (expense.catId == catId) {
+        items.add(expense);
+      }
+    });
+    return items;
+  }
+
+  _buildCategory(Category category) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => CategoryScreen(category: category),
+          builder: (_) => CategoryScreen(
+            catItems: _catItems(category.catId),
+            catDetails: category,
+          ),
         ),
       ),
       child: Container(
@@ -50,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Text(
-                  '\$${(category.maxAmount - totalAmountSpent).toStringAsFixed(2)} / \$${category.maxAmount.toStringAsFixed(2)}',
+                  '\$${(category.maxAmount - category.spentAmount).toStringAsFixed(2)} / \$${category.maxAmount.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.w600,
@@ -62,8 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
             LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
                 final double maxBarWidth = constraints.maxWidth;
-                final double percent = (category.maxAmount - totalAmountSpent) /
-                    category.maxAmount;
+                final double percent =
+                    (category.maxAmount - category.spentAmount) /
+                        category.maxAmount;
                 double barWidth = percent * maxBarWidth;
 
                 if (barWidth < 0) {
@@ -72,14 +87,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 return Stack(
                   children: <Widget>[
                     Container(
-                      height: 20.0,
+                      height: 10.0,
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                     ),
                     Container(
-                      height: 20.0,
+                      height: 10.0,
                       width: barWidth,
                       decoration: BoxDecoration(
                         color: getColor(context, percent),
@@ -139,18 +154,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    child: BarChart(weeklySpending),
+                    child: BarChart(),
                   );
                 } else {
-                  final Category category = categories[index - 1];
-                  double totalAmountSpent = 0;
-                  category.expenses.forEach((Expense expense) {
-                    totalAmountSpent += expense.cost;
-                  });
-                  return _buildCategory(category, totalAmountSpent);
+                  final Category category = dummyCategories[index - 1];
+                  return _buildCategory(category);
                 }
               },
-              childCount: 1 + categories.length,
+              childCount: 1 + dummyCategories.length,
             ),
           ),
         ],
