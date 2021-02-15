@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_budget_ui/data/dummy_data.dart';
 import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
+import 'package:flutter_budget_ui/screens/addEdit.dart';
 import 'package:flutter_budget_ui/screens/category_screen.dart';
+import 'package:flutter_budget_ui/services/category_service.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
+import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,6 +16,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  var _categoryService = CategoryService();
+  List<Category> _categoryList = List<Category>();
+  @override
+  void initState() {
+    getAllCategories();
+
+    super.initState();
+  }
+
+  getAllCategories() async {
+    _categoryList = List<Category>();
+    var categories = await _categoryService.getCategory();
+    categories.forEach((category) {
+      setState(() {
+        var categoryModel = Category();
+        categoryModel.catId = category['catId'];
+        categoryModel.name = category['catName'];
+        categoryModel.maxAmount = category['maxAmount'];
+        categoryModel.spentAmount = category['spentAmount'];
+        _categoryList.add(categoryModel);
+      });
+    });
+  }
+
   List<Expense> _catItems(catId) {
     List<Expense> items = [];
     dummyDataExpense.forEach((Expense expense) {
@@ -34,6 +61,37 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      onLongPress: () {
+        return showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (param) {
+              return AlertDialog(
+                title: Text('Delete ${category.name}?'),
+                actions: [
+                  RaisedButton(
+                      child: Text('No'),
+                      onPressed: () => Navigator.pop(context)),
+                  RaisedButton(
+                    child: Text('Yes'),
+                    onPressed: () async {
+                      var resulti =
+                          await _categoryService.deleteCategory(category.catId);
+                      if (resulti > 0) {
+                        Navigator.pop(context);
+                        getAllCategories();
+                        showDialog(
+                            context: context,
+                            builder: (param) {
+                              return AlertDialog(title: Text('Updated!'));
+                            });
+                      }
+                    },
+                  )
+                ],
+              );
+            });
+      },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
         padding: EdgeInsets.all(20.0),
@@ -121,11 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
             floating: true,
             // pinned: true,
             expandedHeight: 100.0,
-            leading: IconButton(
-              icon: Icon(Icons.settings),
-              iconSize: 30.0,
-              onPressed: () {},
-            ),
             flexibleSpace: FlexibleSpaceBar(
               title: Text('Budget App'),
             ),
@@ -133,7 +186,11 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 icon: Icon(Icons.add),
                 iconSize: 30.0,
-                onPressed: () {},
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => AddEditTemp(mode: "Add Category")),
+                ),
               ),
             ],
           ),
@@ -156,12 +213,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: BarChart(),
                   );
-                } else {
-                  final Category category = dummyCategories[index - 1];
+                } else if (index == 1) {
+                  return Text(
+                    'Long Press to Delete a Category',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey[400],
+                        fontSize: 10),
+                  );
+                } else if (_categoryList.length != 0) {
+                  final Category category = _categoryList[index - 2];
                   return _buildCategory(category);
+                } else {
+                  return Container();
                 }
               },
-              childCount: 1 + dummyCategories.length,
+              childCount: 2 + _categoryList.length,
             ),
           ),
         ],
