@@ -114,6 +114,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
+               Container(
+                 height: 40,
+                 width:20,
+                 
+                                child: IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          // _editCategory(context, _categoryList[index].id);
+                        }),
+               ),
                 Text(
                   category.name,
                   style: TextStyle(

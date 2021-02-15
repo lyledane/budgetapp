@@ -5,8 +5,8 @@
 
 // final rand = Random();
 
-import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
-import 'package:flutter_budget_ui/models/expense_model.dart';
+// import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
+// import 'package:flutter_budget_ui/models/expense_model.dart';
 
 // _generateExpenses() {
 //   List<Expense> expenses = [
