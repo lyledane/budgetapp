@@ -15,6 +15,6 @@ class CategoryService {
   }
 
   deleteCategory(int itemId) async {
-    return _repository.deleteData('category', itemId);
+    return _repository.deleteCategoryData('category', itemId);
   }
 }

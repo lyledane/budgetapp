@@ -7,8 +7,6 @@ import 'package:flutter_budget_ui/screens/addEdit.dart';
 import 'package:flutter_budget_ui/screens/category_screen.dart';
 import 'package:flutter_budget_ui/services/category_service.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
-import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -21,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     getAllCategories();
-
     super.initState();
   }
 
@@ -29,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _categoryList = List<Category>();
     var categories = await _categoryService.getCategory();
     categories.forEach((category) {
+      print(category);
       setState(() {
         var categoryModel = Category();
         categoryModel.catId = category['catId'];
@@ -69,14 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
               return AlertDialog(
                 title: Text('Delete ${category.name}?'),
                 actions: [
-                  RaisedButton(
-                      child: Text('No'),
-                      onPressed: () => Navigator.pop(context)),
+                  RaisedButton(child: Text('No'), onPressed: () => Navigator.pop(context)),
                   RaisedButton(
                     child: Text('Yes'),
                     onPressed: () async {
-                      var resulti =
-                          await _categoryService.deleteCategory(category.catId);
+                      var resulti = await _categoryService.deleteCategory(category.catId);
                       if (resulti > 0) {
                         Navigator.pop(context);
                         getAllCategories();
@@ -114,16 +109,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-               Container(
-                 height: 40,
-                 width:20,
-                 
-                                child: IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          // _editCategory(context, _categoryList[index].id);
-                        }),
-               ),
+                Container(
+                  height: 40,
+                  width: 20,
+                  child: IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        // _editCategory(context, _categoryList[index].id);
+                      }),
+                ),
                 Text(
                   category.name,
                   style: TextStyle(
@@ -144,9 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
             LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
                 final double maxBarWidth = constraints.maxWidth;
-                final double percent =
-                    (category.maxAmount - category.spentAmount) /
-                        category.maxAmount;
+                final double percent = (category.maxAmount - category.spentAmount) / category.maxAmount;
                 double barWidth = percent * maxBarWidth;
 
                 if (barWidth < 0) {
@@ -194,14 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: <Widget>[
               IconButton(
-                icon: Icon(Icons.add),
-                iconSize: 30.0,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => AddEditTemp(mode: "Add Category")),
-                ),
-              ),
+                  icon: Icon(Icons.add),
+                  iconSize: 30.0,
+                  onPressed: () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (_) => AddEditTemp(mode: "Add Category")));
+                    getAllCategories();
+                  }),
             ],
           ),
           SliverList(
@@ -227,10 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Text(
                     'Long Press to Delete a Category',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[400],
-                        fontSize: 10),
+                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[400], fontSize: 10),
                   );
                 } else if (_categoryList.length != 0) {
                   final Category category = _categoryList[index - 2];

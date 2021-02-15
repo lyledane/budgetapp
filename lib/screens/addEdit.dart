@@ -38,7 +38,7 @@ class AddEditTempState extends State<AddEditTemp> {
                 _category.spentAmount = 0;
                 var result = _categoryService.saveCategory(_category);
                 print(result);
-                Navigator.of(context).pushReplacementNamed('/');
+                Navigator.of(context).pop(null);
               },
               child: Text("add"),
             )

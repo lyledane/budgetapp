@@ -32,12 +32,16 @@ class Repository {
 
   updateData(table, data) async {
     var connection = await database;
-    return await connection
-        .update(table, data, where: 'id=?', whereArgs: [data['id']]);
+    return await connection.update(table, data, where: 'id=?', whereArgs: [data['id']]);
   }
 
   deleteData(table, itemId) async {
     var connection = await database;
     return await connection.rawDelete("DELETE FROM $table where id = $itemId");
+  }
+
+  deleteCategoryData(table, itemId) async {
+    var connection = await database;
+    return await connection.rawDelete("DELETE FROM $table where catId = $itemId");
   }
 }
