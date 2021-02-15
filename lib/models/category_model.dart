@@ -1,8 +1,18 @@
-class Category {
-  final int catId;
-  final String name;
-  final double maxAmount;
-  final double spentAmount;
+import 'package:flutter/material.dart';
 
-  Category({this.spentAmount, this.catId, this.name, this.maxAmount});
+class Category {
+  int catId;
+  String name;
+  double maxAmount;
+  double spentAmount;
+
+  categoryMap() {
+    var mapping = Map<String, dynamic>();
+    mapping['catId'] = catId;
+    mapping['catName'] = name;
+    mapping['maxAmount'] = maxAmount;
+    mapping['spentAmount'] = spentAmount;
+
+    return mapping;
+  }
 }
