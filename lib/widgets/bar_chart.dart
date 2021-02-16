@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
+import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:intl/intl.dart';
 
 class BarChart extends StatefulWidget {
@@ -10,27 +10,50 @@ class BarChart extends StatefulWidget {
 
 class _BarChartState extends State<BarChart> {
   DateTime date = DateTime.now();
+  var _expenseList;
+
+  var _categoryService = ExpenseService();
   @override
   void initState() {
     while (date.weekday != DateTime.saturday) {
       date = date.add(Duration(days: 1));
     }
+    getAllExpenses();
     super.initState();
+  }
+
+  getAllExpenses() async {
+    setState(() {
+      _expenseList = List<Expense>();
+    });
+    var categories = await _categoryService.getExpenses();
+    categories.forEach((expense) {
+      setState(() {
+        var expenseModel = Expense();
+        expenseModel.desc = expense['desc'];
+        expenseModel.expenseId = expense['expenseId'];
+        expenseModel.catId = expense['catId'];
+        expenseModel.expenseCost = expense['expenseCost'];
+        expenseModel.datePurchased = expense['datePurchased'];
+        expenseModel.expenseName = expense['expenseName'];
+        _expenseList.add(expenseModel);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     double mostExpensive = 0;
     List<double> expenses = [];
-    List<Expense> week = dummyDataExpense;
     DateTime dateTrav = date;
 
     for (var i = 0; i < 7; i++) {
       double sum = 0;
-      for (var a = 0; a < week.length; a++) {
+      for (var a = 0; a < _expenseList.length; a++) {
         if (DateFormat.MMMd('en_US').format(dateTrav) ==
-            DateFormat.MMMd('en_US').format(week[a].datePurchased))
-          sum += week[a].itemCost;
+            DateFormat.MMMd('en_US')
+                .format(DateTime.parse(_expenseList[a].datePurchased)))
+          sum += _expenseList[a].expenseCost;
       }
       if (sum > mostExpensive) {
         mostExpensive = sum;

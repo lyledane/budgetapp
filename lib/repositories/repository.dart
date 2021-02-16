@@ -27,17 +27,34 @@ class Repository {
 
   readDataById(table, itemId) async {
     var connection = await database;
-    return await connection.query(table, where: 'id=?', whereArgs: [itemId]);
+    var idName;
+    if (table == 'category')
+      idName = "catId";
+    else
+      idName = "expenseId";
+    return await connection
+        .query(table, where: '$idName=?', whereArgs: [itemId]);
   }
 
   updateData(table, data) async {
     var connection = await database;
-    return await connection
-        .update(table, data, where: 'id=?', whereArgs: [data['id']]);
+    var idName;
+    if (table == 'category')
+      idName = "catId";
+    else
+      idName = "expenseId";
+    return await connection.update(table, data,
+        where: '$idName=?', whereArgs: [data['$idName=?']]);
   }
 
   deleteData(table, itemId) async {
     var connection = await database;
-    return await connection.rawDelete("DELETE FROM $table where id = $itemId");
+    var idName;
+    if (table == 'category')
+      idName = "catId";
+    else
+      idName = "expenseId";
+    return await connection
+        .rawDelete("DELETE FROM $table where $idName = $itemId");
   }
 }

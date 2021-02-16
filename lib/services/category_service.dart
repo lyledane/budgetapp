@@ -14,7 +14,11 @@ class CategoryService {
     return _repository.readData('category');
   }
 
-  deleteCategory(int itemId) async {
+  deleteCategory(itemId) async {
     return _repository.deleteData('category', itemId);
+  }
+
+  updateCategory(itemId) async {
+    return _repository.updateData('category', itemId);
   }
 }

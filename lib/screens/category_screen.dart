@@ -2,22 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
+import 'package:flutter_budget_ui/screens/add_screen.dart';
+import 'package:flutter_budget_ui/services/category_service.dart';
+import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:flutter_budget_ui/widgets/radial_painter.dart';
 
 class CategoryScreen extends StatefulWidget {
-  final List<Expense> catItems;
   final Category catDetails;
-  const CategoryScreen({Key key, this.catItems, this.catDetails})
-      : super(key: key);
+  const CategoryScreen({Key key, this.catDetails}) : super(key: key);
 
   @override
   _CategoryScreenState createState() => _CategoryScreenState();
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
+  var _expenseList;
+  var _categoryService = ExpenseService();
+  @override
+  void initState() {
+    super.initState();
+    getAllExpenses();
+  }
+
+  getAllExpenses() async {
+    setState(() {
+      _expenseList = List<Expense>();
+    });
+    var categories = await _categoryService.getExpenses();
+    categories.forEach((expense) {
+      if (expense['catId'] == widget.catDetails.catId) {
+        setState(() {
+          var expenseModel = Expense();
+          expenseModel.desc = expense['desc'];
+          expenseModel.expenseId = expense['expenseId'];
+          expenseModel.catId = expense['catId'];
+          expenseModel.expenseCost = expense['expenseCost'];
+          expenseModel.datePurchased = expense['datePurchased'];
+          expenseModel.expenseName = expense['expenseName'];
+          _expenseList.add(expenseModel);
+        });
+      }
+    });
+  }
+
   _buildExpenses() {
     List<Widget> expenseList = [];
-    widget.catItems.forEach((Expense expense) {
+    _expenseList.forEach((Expense expense) {
       expenseList.add(Container(
         alignment: Alignment.center,
         margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -40,14 +70,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                expense.itemName,
+                expense.expenseName,
                 style: TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '-\$${expense.itemCost.toStringAsFixed(2)}',
+                '-\$${expense.expenseCost.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 20.0,
@@ -78,7 +108,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
           IconButton(
             icon: Icon(Icons.add),
             iconSize: 30.0,
-            onPressed: () {},
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddScreen()),
+            ),
           )
         ],
       ),

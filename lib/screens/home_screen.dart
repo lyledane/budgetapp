@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_budget_ui/data/dummy_data_expenses.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
-import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/addEdit.dart';
+
 import 'package:flutter_budget_ui/screens/category_screen.dart';
 import 'package:flutter_budget_ui/services/category_service.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
-import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -21,12 +18,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     getAllCategories();
-
     super.initState();
   }
 
   getAllCategories() async {
-    _categoryList = List<Category>();
+    setState(() {
+      _categoryList = List<Category>();
+    });
     var categories = await _categoryService.getCategory();
     categories.forEach((category) {
       setState(() {
@@ -40,23 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  List<Expense> _catItems(catId) {
-    List<Expense> items = [];
-    dummyDataExpense.forEach((Expense expense) {
-      if (expense.catId == catId) {
-        items.add(expense);
-      }
-    });
-    return items;
-  }
-
   _buildCategory(Category category) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => CategoryScreen(
-            catItems: _catItems(category.catId),
             catDetails: category,
           ),
         ),
@@ -114,16 +101,21 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-               Container(
-                 height: 40,
-                 width:20,
-                 
-                                child: IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          // _editCategory(context, _categoryList[index].id);
-                        }),
-               ),
+                Container(
+                  height: 40,
+                  width: 20,
+                  child: IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => AddEditTemp(
+                                mode: "Edit Category",
+                                catDetails: category,
+                              )),
+                    ),
+                  ),
+                ),
                 Text(
                   category.name,
                   style: TextStyle(

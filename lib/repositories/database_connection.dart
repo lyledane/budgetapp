@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 class DatabaseConnection {
   setDatabase() async {
     var directory = await getApplicationDocumentsDirectory();
-    var path = join(directory.path, 'db_budgetAppSam_sqflite');
+    var path = join(directory.path, 'db_budgetAp_sqflite');
     var database =
         await openDatabase(path, version: 1, onCreate: _onCreatingDatabase);
     return database;
@@ -17,14 +17,20 @@ class DatabaseConnection {
         "catName TEXT," +
         "maxAmount REAL," +
         "spentAmount REAL" +
-        ");"
-            "create table expense(" +
+        ");");
+    database.execute("create table expense(" +
         "expenseId INTEGER PRIMARY KEY," +
         "catId INTEGER," +
         "expenseName TEXT," +
-        "spentAmount REAL," +
-        "spentDate TEXT," +
+        "desc TEXT," +
+        "expenseCost REAL," +
+        "datePurchased TEXT," +
         "FOREIGN KEY (catId) REFERENCES category(catId)" +
         ");");
+  }
+
+  _onUpdatingDatabase(Database db, int version) async {
+    db.execute("DROP Databa se");
+    _onCreatingDatabase(db, version);
   }
 }
