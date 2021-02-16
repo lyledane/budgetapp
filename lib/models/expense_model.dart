@@ -4,7 +4,7 @@ class Expense {
   String expenseName;
   String desc;
   double expenseCost;
-  DateTime datePurchased;
+  String datePurchased;
 
   expenseMap() {
     var mapping = Map<String, dynamic>();

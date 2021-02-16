@@ -18,7 +18,7 @@ class CategoryService {
     return _repository.deleteData('category', itemId);
   }
 
-  updateCategory(itemId) async {
-    return _repository.updateData('category', itemId);
+  updateCategory(Category category) async {
+    return _repository.updateData('category', category);
   }
 }

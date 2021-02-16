@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
+import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/addEdit.dart';
 
 import 'package:flutter_budget_ui/screens/category_screen.dart';
 import 'package:flutter_budget_ui/services/category_service.dart';
+import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   var _categoryService = CategoryService();
+  var _expenseService = ExpenseService();
   List<Category> _categoryList = List<Category>();
   @override
   void initState() {
@@ -35,6 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
         categoryModel.spentAmount = category['spentAmount'];
         _categoryList.add(categoryModel);
       });
+    });
+  }
+
+  deleteCatItems(catId) async {
+    var expenses = await _expenseService.getExpenses();
+    expenses.forEach((expense) async {
+      if (expense['catId'] == catId)
+        await _expenseService.deleteExpense(expense['expenseId']);
     });
   }
 
@@ -62,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   RaisedButton(
                     child: Text('Yes'),
                     onPressed: () async {
+                      deleteCatItems(category.catId);
                       var resulti =
                           await _categoryService.deleteCategory(category.catId);
                       if (resulti > 0) {

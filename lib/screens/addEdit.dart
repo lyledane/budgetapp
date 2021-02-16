@@ -28,9 +28,9 @@ class AddEditTempState extends State<AddEditTemp> {
 
   _getHint() {
     if (widget.catDetails != null) {
-      return 'Amount';
-    } else
       return widget.catDetails.maxAmount;
+    } else
+      return 'Amount';
   }
 
   @override
@@ -45,7 +45,7 @@ class AddEditTempState extends State<AddEditTemp> {
               controller: name,
             ),
             TextField(
-              decoration: _getHint(),
+              decoration: InputDecoration(hintText: _getHint()),
               controller: amount,
               keyboardType: TextInputType.number,
             ),

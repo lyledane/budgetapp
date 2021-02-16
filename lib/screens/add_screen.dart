@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
+import 'package:flutter_budget_ui/services/category_service.dart';
 import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:intl/intl.dart';
 
 class AddScreen extends StatefulWidget {
-  final catId;
+  final Category catDetails;
 
-  const AddScreen({Key key, this.catId}) : super(key: key);
+  const AddScreen({Key key, this.catDetails}) : super(key: key);
+
   @override
   _AddScreenState createState() => _AddScreenState();
 }
@@ -15,12 +18,19 @@ class _AddScreenState extends State<AddScreen> {
   var _addItemController = TextEditingController();
   var _addDescriptionController = TextEditingController();
   var _addDateController = TextEditingController();
-  var _selectedValue;
   var _addAmountController = TextEditingController();
-  var _categories = List<DropdownMenuItem>();
+  var _categories = TextEditingController();
   var _expenseService = ExpenseService();
+  var _categoryService = CategoryService();
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   DateTime _dateTime = DateTime.now();
   Expense _expense = Expense();
+
+  @override
+  void initState() {
+    super.initState();
+    _categories.text = widget.catDetails.name;
+  }
 
   _selectedTodoDate(BuildContext context) async {
     var _pickedDate = await showDatePicker(
@@ -75,27 +85,30 @@ class _AddScreenState extends State<AddScreen> {
             decoration:
                 InputDecoration(labelText: 'Amount', hintText: 'Enter Amount'),
           ),
-          DropdownButtonFormField(
-            value: _selectedValue,
-            items: _categories,
-            hint: Text('Category'),
-            onChanged: (value) {
-              setState(() {
-                _selectedValue = value;
-              });
-            },
+          TextField(
+            readOnly: true,
+            keyboardType: TextInputType.number,
+            controller: _categories,
+            decoration: InputDecoration(labelText: 'Category'),
           ),
           RaisedButton(
             child: Text('Submit'),
             onPressed: () async {
-              _expense.catId = widget.catId;
-              _expense.datePurchased = _dateTime;
-              _expense.desc = _addDescriptionController.text;
-              _expense.expenseCost = double.parse(_addAmountController.text);
-              _expense.expenseName = _addItemController.text;
-              var result = _expenseService.saveExpense(_expense);
-              print(result);
-              Navigator.of(context).pushReplacementNamed('/');
+              if (double.parse(_addAmountController.text) <
+                  widget.catDetails.maxAmount - widget.catDetails.spentAmount) {
+                _expense.catId = widget.catDetails.catId;
+                _expense.datePurchased = dateFormat.format(_dateTime);
+                _expense.desc = _addDescriptionController.text;
+                _expense.expenseCost = double.parse(_addAmountController.text);
+                _expense.expenseName = _addItemController.text;
+                var result = _expenseService.saveExpense(_expense);
+                print(result);
+                Navigator.of(context).pushReplacementNamed('/');
+
+                Category cat = widget.catDetails;
+                cat.spentAmount += double.parse(_addAmountController.text);
+                _categoryService.updateCategory(cat);
+              }
             },
           )
         ]),

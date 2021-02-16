@@ -11,7 +11,7 @@ class BarChart extends StatefulWidget {
 class _BarChartState extends State<BarChart> {
   DateTime date = DateTime.now();
   var _expenseList;
-
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   var _categoryService = ExpenseService();
   @override
   void initState() {
@@ -29,6 +29,7 @@ class _BarChartState extends State<BarChart> {
     var categories = await _categoryService.getExpenses();
     categories.forEach((expense) {
       setState(() {
+        // _categoryService.deleteExpense(expense['expenseId']);
         var expenseModel = Expense();
         expenseModel.desc = expense['desc'];
         expenseModel.expenseId = expense['expenseId'];
@@ -52,7 +53,7 @@ class _BarChartState extends State<BarChart> {
       for (var a = 0; a < _expenseList.length; a++) {
         if (DateFormat.MMMd('en_US').format(dateTrav) ==
             DateFormat.MMMd('en_US')
-                .format(DateTime.parse(_expenseList[a].datePurchased)))
+                .format(dateFormat.parse(_expenseList[a].datePurchased)))
           sum += _expenseList[a].expenseCost;
       }
       if (sum > mostExpensive) {

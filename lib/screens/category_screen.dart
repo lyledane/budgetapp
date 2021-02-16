@@ -3,7 +3,6 @@ import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/add_screen.dart';
-import 'package:flutter_budget_ui/services/category_service.dart';
 import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:flutter_budget_ui/widgets/radial_painter.dart';
 
@@ -110,7 +109,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
             iconSize: 30.0,
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => AddScreen()),
+              MaterialPageRoute(
+                  builder: (_) => AddScreen(catDetails: widget.catDetails)),
             ),
           )
         ],

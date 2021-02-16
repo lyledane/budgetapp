@@ -6,8 +6,8 @@ class ExpenseService {
   ExpenseService() {
     _repository = Repository();
   }
-  saveExpense(Expense category) async {
-    return await _repository.insertData('expense', category.expenseMap());
+  saveExpense(Expense expense) async {
+    return await _repository.insertData('expense', expense.expenseMap());
   }
 
   deleteExpense(itemId) async {

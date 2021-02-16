@@ -28,9 +28,4 @@ class DatabaseConnection {
         "FOREIGN KEY (catId) REFERENCES category(catId)" +
         ");");
   }
-
-  _onUpdatingDatabase(Database db, int version) async {
-    db.execute("DROP Databa se");
-    _onCreatingDatabase(db, version);
-  }
 }
