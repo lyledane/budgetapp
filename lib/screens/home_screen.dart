@@ -5,6 +5,7 @@ import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/addEdit.dart';
 import 'package:flutter_budget_ui/screens/category_screen.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
+import 'Add.dart';
 
 class HomeScreen extends StatefulWidget {
   // final Function populateCategories;
@@ -22,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   _buildCategory(Category category) {
+
     return GestureDetector(
       onTap: () => Navigator.of(context)
           .pushNamed(CategoryScreen.route, arguments: category),
@@ -149,6 +151,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+     void  _startAddNewTransaction(BuildContext ctx){
+    showModalBottomSheet(
+      context: ctx, 
+      builder:(_){
+      return NewTransaction( _addNewTransaction);
+      }
+    );           
+   }
+  
+    void _addNewTransaction(String catname, amount)
+    {
+      final Category cat = Category(
+        name: catname,
+        maxAmount: amount,
+        id: _userTransactions.length.toString());
+        setState(() {
+          _userTransactions.add(cat);
+        });
+      
+    }
+
+  
+
   @override
   Widget build(BuildContext context) {
     // print(_categoryList[0].spentAmount);
@@ -181,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   //       builder: (_) => AddEditTemp(mode: "Add Category")),
                   // ),
                   ),
+
             ],
           ),
           SliverList(
