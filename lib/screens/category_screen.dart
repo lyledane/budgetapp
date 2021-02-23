@@ -3,44 +3,30 @@ import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
 import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/add_screen.dart';
-import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:flutter_budget_ui/widgets/radial_painter.dart';
 
 class CategoryScreen extends StatefulWidget {
-  final Category catDetails;
-  const CategoryScreen({Key key, this.catDetails}) : super(key: key);
+  static const route = 'category';
+  final List<Expense> expenseList;
+
+  const CategoryScreen({Key key, this.expenseList}) : super(key: key);
 
   @override
   _CategoryScreenState createState() => _CategoryScreenState();
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  var _expenseList;
-  var _categoryService = ExpenseService();
+  List<Expense> _expenseList = List<Expense>();
+  Category catDetail;
+  var _loadedInitData = false;
   @override
-  void initState() {
-    super.initState();
-    getAllExpenses();
-  }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-  getAllExpenses() async {
-    setState(() {
-      _expenseList = List<Expense>();
-    });
-    var categories = await _categoryService.getExpenses();
-    categories.forEach((expense) {
-      if (expense['catId'] == widget.catDetails.catId) {
-        setState(() {
-          var expenseModel = Expense();
-          expenseModel.desc = expense['desc'];
-          expenseModel.expenseId = expense['expenseId'];
-          expenseModel.catId = expense['catId'];
-          expenseModel.expenseCost = expense['expenseCost'];
-          expenseModel.datePurchased = expense['datePurchased'];
-          expenseModel.expenseName = expense['expenseName'];
-          _expenseList.add(expenseModel);
-        });
-      }
+    if (_loadedInitData) return;
+    catDetail = ModalRoute.of(context).settings.arguments as Category;
+    widget.expenseList.forEach((cat) {
+      if (cat.catId == catDetail.catId) _expenseList.add(cat);
     });
   }
 
@@ -96,22 +82,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
     //double totalAmountSpent = widget.catDetails.spentAmount;
-    final double amountLeft =
-        widget.catDetails.maxAmount - widget.catDetails.spentAmount;
-    final double percent = amountLeft / widget.catDetails.maxAmount;
+    final double amountLeft = catDetail.maxAmount - catDetail.spentAmount;
+    final double percent = amountLeft / catDetail.maxAmount;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.catDetails.name),
+        title: Text(catDetail.name),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add),
             iconSize: 30.0,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => AddScreen(catDetails: widget.catDetails)),
-            ),
+            onPressed: () => Navigator.of(context)
+                .pushNamed(AddScreen.route, arguments: catDetail),
           )
         ],
       ),
@@ -143,7 +125,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ),
                 child: Center(
                   child: Text(
-                    '\$${amountLeft.toStringAsFixed(2)} / \$${widget.catDetails.maxAmount}',
+                    '\$${amountLeft.toStringAsFixed(2)} / \$${catDetail.maxAmount}',
                     style: TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w600,
@@ -151,6 +133,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   ),
                 ),
               ),
+            ),
+            Text(
+              'Long Press to Delete a Category',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey[400],
+                  fontSize: 10),
             ),
             _buildExpenses(),
           ],

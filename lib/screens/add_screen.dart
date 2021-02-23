@@ -6,9 +6,7 @@ import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:intl/intl.dart';
 
 class AddScreen extends StatefulWidget {
-  final Category catDetails;
-
-  const AddScreen({Key key, this.catDetails}) : super(key: key);
+  static const route = 'addexpense';
 
   @override
   _AddScreenState createState() => _AddScreenState();
@@ -25,11 +23,19 @@ class _AddScreenState extends State<AddScreen> {
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   DateTime _dateTime = DateTime.now();
   Expense _expense = Expense();
+  Category catDetails;
+
+  var _loadedInitData = false;
 
   @override
-  void initState() {
-    super.initState();
-    _categories.text = widget.catDetails.name;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_loadedInitData) return;
+
+    catDetails = ModalRoute.of(context).settings.arguments as Category;
+    _categories.text = catDetails.name;
+    _loadedInitData = true;
   }
 
   _selectedTodoDate(BuildContext context) async {
@@ -67,6 +73,7 @@ class _AddScreenState extends State<AddScreen> {
                 labelText: 'Description', hintText: 'Write Todo Description'),
           ),
           TextField(
+            readOnly: true,
             controller: _addDateController,
             decoration: InputDecoration(
               labelText: 'Date',
@@ -93,22 +100,28 @@ class _AddScreenState extends State<AddScreen> {
           ),
           RaisedButton(
             child: Text('Submit'),
-            onPressed: () async {
-              if (double.parse(_addAmountController.text) <
-                  widget.catDetails.maxAmount - widget.catDetails.spentAmount) {
-                _expense.catId = widget.catDetails.catId;
-                _expense.datePurchased = dateFormat.format(_dateTime);
-                _expense.desc = _addDescriptionController.text;
-                _expense.expenseCost = double.parse(_addAmountController.text);
-                _expense.expenseName = _addItemController.text;
-                var result = _expenseService.saveExpense(_expense);
-                print(result);
-                Navigator.of(context).pushReplacementNamed('/');
-
-                Category cat = widget.catDetails;
-                cat.spentAmount += double.parse(_addAmountController.text);
-                _categoryService.updateCategory(cat);
-              }
+            onPressed: () {
+              setState(() {
+                if (double.parse(_addAmountController.text) <
+                    catDetails.maxAmount - catDetails.spentAmount) {
+                  _expense.catId = catDetails.catId;
+                  _expense.datePurchased = dateFormat.format(_dateTime);
+                  _expense.desc = _addDescriptionController.text;
+                  _expense.expenseCost =
+                      double.parse(_addAmountController.text);
+                  _expense.expenseName = _addItemController.text;
+                  var result = _expenseService.saveExpense(_expense);
+                  print(result);
+                  Category cat;
+                  cat.catId = catDetails.catId;
+                  cat.maxAmount = catDetails.maxAmount;
+                  cat.name = catDetails.name;
+                  cat.spentAmount = catDetails.spentAmount +
+                      double.parse(_addAmountController.text);
+                  _categoryService.updateCategory(cat);
+                  Navigator.of(context).pushReplacementNamed('/');
+                }
+              });
             },
           )
         ]),

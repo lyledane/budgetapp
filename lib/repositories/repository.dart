@@ -40,9 +40,9 @@ class Repository {
     var connection = await database;
     var idName;
     if (table == 'category')
-      idName = "catId";
+      idName = 'catId';
     else
-      idName = "expenseId";
+      idName = 'expenseId';
     return await connection.update(table, data,
         where: '$idName=?', whereArgs: [data['$idName=?']]);
   }

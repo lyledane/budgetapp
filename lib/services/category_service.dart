@@ -19,6 +19,6 @@ class CategoryService {
   }
 
   updateCategory(Category category) async {
-    return _repository.updateData('category', category);
+    return _repository.updateData('category', category.categoryMap());
   }
 }

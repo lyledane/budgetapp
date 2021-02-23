@@ -1,64 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
-import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/addEdit.dart';
-
 import 'package:flutter_budget_ui/screens/category_screen.dart';
-import 'package:flutter_budget_ui/services/category_service.dart';
-import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
 
 class HomeScreen extends StatefulWidget {
+  // final Function populateCategories;
+  final Function deleteCategory;
+  final List<Category> categoryList;
+
+  const HomeScreen({Key key, this.deleteCategory, this.categoryList})
+      : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  var _categoryService = CategoryService();
-  var _expenseService = ExpenseService();
-  List<Category> _categoryList = List<Category>();
-  @override
-  void initState() {
-    getAllCategories();
-    super.initState();
-  }
-
-  getAllCategories() async {
-    setState(() {
-      _categoryList = List<Category>();
-    });
-    var categories = await _categoryService.getCategory();
-    categories.forEach((category) {
-      setState(() {
-        var categoryModel = Category();
-        categoryModel.catId = category['catId'];
-        categoryModel.name = category['catName'];
-        categoryModel.maxAmount = category['maxAmount'];
-        categoryModel.spentAmount = category['spentAmount'];
-        _categoryList.add(categoryModel);
-      });
-    });
-  }
-
-  deleteCatItems(catId) async {
-    var expenses = await _expenseService.getExpenses();
-    expenses.forEach((expense) async {
-      if (expense['catId'] == catId)
-        await _expenseService.deleteExpense(expense['expenseId']);
-    });
-  }
-
   _buildCategory(Category category) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CategoryScreen(
-            catDetails: category,
-          ),
-        ),
-      ),
+      onTap: () => Navigator.of(context)
+          .pushNamed(CategoryScreen.route, arguments: category),
       onLongPress: () {
         return showDialog(
             context: context,
@@ -72,19 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () => Navigator.pop(context)),
                   RaisedButton(
                     child: Text('Yes'),
-                    onPressed: () async {
-                      deleteCatItems(category.catId);
-                      var resulti =
-                          await _categoryService.deleteCategory(category.catId);
-                      if (resulti > 0) {
-                        Navigator.pop(context);
-                        getAllCategories();
-                        showDialog(
-                            context: context,
-                            builder: (param) {
-                              return AlertDialog(title: Text('Updated!'));
-                            });
-                      }
+                    onPressed: () {
+                      setState(() {
+                        widget.deleteCategory(category.catId);
+                      });
                     },
                   )
                 ],
@@ -117,16 +71,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 40,
                   width: 20,
                   child: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => AddEditTemp(
-                                mode: "Edit Category",
-                                catDetails: category,
-                              )),
-                    ),
-                  ),
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        Map<String, Object> data = {
+                          'category': category,
+                          'title': "Edit Category",
+                        };
+                        Navigator.of(context)
+                            .pushNamed(AddEditTemp.route, arguments: data);
+                      }
+                      // () => Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //       builder: (_) => AddEditTemp(
+                      //             mode: "Edit Category",
+                      //             catDetails: category,
+                      //           )),
+                      // ),
+                      ),
                 ),
                 Text(
                   category.name,
@@ -185,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // print(_categoryList[0].spentAmount);
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
@@ -198,14 +161,22 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             actions: <Widget>[
               IconButton(
-                icon: Icon(Icons.add),
-                iconSize: 30.0,
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => AddEditTemp(mode: "Add Category")),
-                ),
-              ),
+                  icon: Icon(Icons.add),
+                  iconSize: 30.0,
+                  onPressed: () {
+                    Map<String, Object> data = {
+                      'category': null,
+                      'title': "Add Category",
+                    };
+                    Navigator.of(context)
+                        .pushNamed(AddEditTemp.route, arguments: data);
+                  }
+                  // () => Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (_) => AddEditTemp(mode: "Add Category")),
+                  // ),
+                  ),
             ],
           ),
           SliverList(
@@ -236,14 +207,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.grey[400],
                         fontSize: 10),
                   );
-                } else if (_categoryList.length != 0) {
-                  final Category category = _categoryList[index - 2];
+                } else if (widget.categoryList.length != 0) {
+                  final Category category = widget.categoryList[index - 2];
                   return _buildCategory(category);
                 } else {
                   return Container();
                 }
               },
-              childCount: 2 + _categoryList.length,
+              childCount: 2 + widget.categoryList.length,
             ),
           ),
         ],
