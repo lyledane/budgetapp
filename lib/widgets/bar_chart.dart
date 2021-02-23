@@ -4,42 +4,23 @@ import 'package:flutter_budget_ui/services/expense_services.dart';
 import 'package:intl/intl.dart';
 
 class BarChart extends StatefulWidget {
+  final List<Expense> expenseList;
+
+  const BarChart({Key key, this.expenseList}) : super(key: key);
   @override
   _BarChartState createState() => _BarChartState();
 }
 
 class _BarChartState extends State<BarChart> {
   DateTime date = DateTime.now();
-  var _expenseList;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   var _categoryService = ExpenseService();
   @override
   void initState() {
+    super.initState();
     while (date.weekday != DateTime.saturday) {
       date = date.add(Duration(days: 1));
     }
-    getAllExpenses();
-    super.initState();
-  }
-
-  getAllExpenses() async {
-    setState(() {
-      _expenseList = List<Expense>();
-    });
-    var categories = await _categoryService.getExpenses();
-    categories.forEach((expense) {
-      setState(() {
-        // _categoryService.deleteExpense(expense['expenseId']);
-        var expenseModel = Expense();
-        expenseModel.desc = expense['desc'];
-        expenseModel.expenseId = expense['expenseId'];
-        expenseModel.catId = expense['catId'];
-        expenseModel.expenseCost = expense['expenseCost'];
-        expenseModel.datePurchased = expense['datePurchased'];
-        expenseModel.expenseName = expense['expenseName'];
-        _expenseList.add(expenseModel);
-      });
-    });
   }
 
   @override
@@ -50,11 +31,11 @@ class _BarChartState extends State<BarChart> {
 
     for (var i = 0; i < 7; i++) {
       double sum = 0;
-      for (var a = 0; a < _expenseList.length; a++) {
+      for (var a = 0; a < widget.expenseList.length; a++) {
         if (DateFormat.MMMd('en_US').format(dateTrav) ==
             DateFormat.MMMd('en_US')
-                .format(dateFormat.parse(_expenseList[a].datePurchased)))
-          sum += _expenseList[a].expenseCost;
+                .format(dateFormat.parse(widget.expenseList[a].datePurchased)))
+          sum += widget.expenseList[a].expenseCost;
       }
       if (sum > mostExpensive) {
         mostExpensive = sum;

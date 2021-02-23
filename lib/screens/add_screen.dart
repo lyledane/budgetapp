@@ -7,6 +7,11 @@ import 'package:intl/intl.dart';
 
 class AddScreen extends StatefulWidget {
   static const route = 'addexpense';
+  final Function populateExpenses;
+  final Function populateCategory;
+
+  const AddScreen({Key key, this.populateExpenses, this.populateCategory})
+      : super(key: key);
 
   @override
   _AddScreenState createState() => _AddScreenState();
@@ -43,7 +48,7 @@ class _AddScreenState extends State<AddScreen> {
         context: context,
         initialDate: _dateTime,
         firstDate: DateTime(2000),
-        lastDate: DateTime(2100));
+        lastDate: DateTime.now());
 
     if (_pickedDate != null) {
       setState(() {
@@ -104,6 +109,7 @@ class _AddScreenState extends State<AddScreen> {
               setState(() {
                 if (double.parse(_addAmountController.text) <
                     catDetails.maxAmount - catDetails.spentAmount) {
+                  print(catDetails.spentAmount);
                   _expense.catId = catDetails.catId;
                   _expense.datePurchased = dateFormat.format(_dateTime);
                   _expense.desc = _addDescriptionController.text;
@@ -112,15 +118,13 @@ class _AddScreenState extends State<AddScreen> {
                   _expense.expenseName = _addItemController.text;
                   var result = _expenseService.saveExpense(_expense);
                   print(result);
-                  Category cat;
-                  cat.catId = catDetails.catId;
-                  cat.maxAmount = catDetails.maxAmount;
-                  cat.name = catDetails.name;
-                  cat.spentAmount = catDetails.spentAmount +
+                  catDetails.spentAmount = catDetails.spentAmount +
                       double.parse(_addAmountController.text);
-                  _categoryService.updateCategory(cat);
-                  Navigator.of(context).pushReplacementNamed('/');
+                  _categoryService.updateCategory(catDetails);
+                  widget.populateExpenses();
+                  widget.populateCategory();
                 }
+                Navigator.of(context).pushReplacementNamed('/');
               });
             },
           )

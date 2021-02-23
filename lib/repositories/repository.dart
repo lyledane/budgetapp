@@ -43,8 +43,8 @@ class Repository {
       idName = 'catId';
     else
       idName = 'expenseId';
-    return await connection.update(table, data,
-        where: '$idName=?', whereArgs: [data['$idName=?']]);
+    return await connection
+        .update(table, data, where: '$idName=?', whereArgs: [data['$idName']]);
   }
 
   deleteData(table, itemId) async {

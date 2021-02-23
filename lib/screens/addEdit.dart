@@ -40,7 +40,7 @@ class AddEditTempState extends State<AddEditTemp> {
     detail = ModalRoute.of(context).settings.arguments as Map<String, Object>;
     catdet = detail['category'];
     if (detail['category'] != null) {
-      name.text = detail['title'];
+      name.text = catdet.name;
     }
 
     _loadedInitData = true;
@@ -51,6 +51,14 @@ class AddEditTempState extends State<AddEditTemp> {
       return catdet.maxAmount.toString();
     } else
       return 'Amount';
+  }
+
+  _getButtonText() {
+    if (detail['category'] == "Add Category") {
+      return "Add";
+    } else {
+      return "Save";
+    }
   }
 
   @override
@@ -81,7 +89,9 @@ class AddEditTempState extends State<AddEditTemp> {
                       var result = _categoryService.saveCategory(_category);
                       print(result);
                     } else {
+                      _category.catId = catdet.catId;
                       _category.name = name.text;
+                      print(amount.text);
                       _category.maxAmount = double.parse(amount.text);
                       _category.spentAmount = catdet.spentAmount;
                       var result = _categoryService.updateCategory(_category);
@@ -91,7 +101,7 @@ class AddEditTempState extends State<AddEditTemp> {
                   });
                   Navigator.of(context).pushReplacementNamed('/');
                 },
-                child: Text("add"),
+                child: Text(_getButtonText()),
               )
             ],
           ),

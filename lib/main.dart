@@ -17,7 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   List<Category> _categoryList;
-  var _expenseList;
+  List<Expense> _expenseList;
   var _categoryService = CategoryService();
   var _expenseService = ExpenseService();
 
@@ -66,13 +66,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  deleteCategory(catId) {
-    setState(() async {
-      deleteCatItems(catId);
-      await _categoryService.deleteCategory(catId);
-      populateCategories();
-      populateExpenses();
-    });
+  deleteCategory(catId) async {
+    deleteCatItems(catId);
+    await _categoryService.deleteCategory(catId);
+    populateCategories();
+    populateExpenses();
+  }
+
+  deleteExpense(expenseId, category) async {
+    await _expenseService.deleteExpense(expenseId);
+    await _categoryService.updateCategory(category);
+    populateCategories();
+    populateExpenses();
   }
 
   @override
@@ -91,15 +96,23 @@ class _MyAppState extends State<MyApp> {
         primaryColor: Colors.blue,
       ),
       home: HomeScreen(
-          deleteCategory: deleteCategory, categoryList: _categoryList),
+        deleteCategory: deleteCategory,
+        categoryList: _categoryList,
+        expenseList: _expenseList,
+      ),
       routes: {
         AddEditTemp.route: (ctx) => AddEditTemp(
               populateCategories: populateCategories,
             ),
         CategoryScreen.route: (ctx) => CategoryScreen(
+              populateExpenses: populateExpenses,
               expenseList: _expenseList,
+              deleteExpense: deleteExpense,
             ),
-        AddScreen.route: (ctx) => AddScreen(),
+        AddScreen.route: (ctx) => AddScreen(
+              populateExpenses: populateExpenses,
+              populateCategory: populateCategories,
+            ),
       },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(

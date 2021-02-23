@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_budget_ui/helpers/color_helper.dart';
 import 'package:flutter_budget_ui/models/category_model.dart';
+import 'package:flutter_budget_ui/models/expense_model.dart';
 import 'package:flutter_budget_ui/screens/addEdit.dart';
 import 'package:flutter_budget_ui/screens/category_screen.dart';
 import 'package:flutter_budget_ui/widgets/bar_chart.dart';
@@ -9,8 +10,10 @@ class HomeScreen extends StatefulWidget {
   // final Function populateCategories;
   final Function deleteCategory;
   final List<Category> categoryList;
+  final List<Expense> expenseList;
 
-  const HomeScreen({Key key, this.deleteCategory, this.categoryList})
+  const HomeScreen(
+      {Key key, this.deleteCategory, this.categoryList, this.expenseList})
       : super(key: key);
 
   @override
@@ -36,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   RaisedButton(
                     child: Text('Yes'),
                     onPressed: () {
+                      Navigator.pop(context);
                       setState(() {
                         widget.deleteCategory(category.catId);
                       });
@@ -196,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                       borderRadius: BorderRadius.circular(10.0),
                     ),
-                    child: BarChart(),
+                    child: BarChart(expenseList: widget.expenseList),
                   );
                 } else if (index == 1) {
                   return Text(

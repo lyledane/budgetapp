@@ -8,15 +8,19 @@ import 'package:flutter_budget_ui/widgets/radial_painter.dart';
 class CategoryScreen extends StatefulWidget {
   static const route = 'category';
   final List<Expense> expenseList;
+  final Function deleteExpense;
+  final Function populateExpenses;
 
-  const CategoryScreen({Key key, this.expenseList}) : super(key: key);
+  const CategoryScreen(
+      {Key key, this.expenseList, this.deleteExpense, this.populateExpenses})
+      : super(key: key);
 
   @override
   _CategoryScreenState createState() => _CategoryScreenState();
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  List<Expense> _expenseList = List<Expense>();
+  List<Expense> _expenseList;
   Category catDetail;
   var _loadedInitData = false;
   @override
@@ -25,6 +29,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     if (_loadedInitData) return;
     catDetail = ModalRoute.of(context).settings.arguments as Category;
+    _categoryExpenses();
+    _loadedInitData = true;
+  }
+
+  _categoryExpenses() {
+    _expenseList = List<Expense>();
     widget.expenseList.forEach((cat) {
       if (cat.catId == catDetail.catId) _expenseList.add(cat);
     });
@@ -33,43 +43,71 @@ class _CategoryScreenState extends State<CategoryScreen> {
   _buildExpenses() {
     List<Widget> expenseList = [];
     _expenseList.forEach((Expense expense) {
-      expenseList.add(Container(
-        alignment: Alignment.center,
-        margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-        height: 80.0,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue,
-              offset: Offset(0, 2),
-              blurRadius: 6.0,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(30.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                expense.expenseName,
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '-\$${expense.expenseCost.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600,
-                ),
+      expenseList.add(InkWell(
+        onLongPress: () {
+          return showDialog(
+              context: context,
+              barrierDismissible: true,
+              builder: (param) {
+                return AlertDialog(
+                  title: Text('Delete ${expense.expenseName}?'),
+                  actions: [
+                    RaisedButton(
+                        child: Text('No'),
+                        onPressed: () => Navigator.pop(context)),
+                    RaisedButton(
+                      child: Text('Yes'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        setState(() {
+                          catDetail.spentAmount -= expense.expenseCost;
+                          widget.deleteExpense(expense.expenseId, catDetail);
+                          _categoryExpenses();
+                        });
+                      },
+                    )
+                  ],
+                );
+              });
+        },
+        child: Container(
+          alignment: Alignment.center,
+          margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          height: 80.0,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue,
+                offset: Offset(0, 2),
+                blurRadius: 6.0,
               ),
             ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(30.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  expense.expenseName,
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '-\$${expense.expenseCost.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ));
@@ -135,7 +173,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
             ),
             Text(
-              'Long Press to Delete a Category',
+              'Long Press to Delete an Expense',
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontStyle: FontStyle.italic,
