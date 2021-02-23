@@ -1,10 +1,17 @@
-import 'package:flutter_budget_ui/models/expense_model.dart';
-
 class Category {
-  final String id;
-  final String name;
-  final double maxAmount;
-  final List<Expense> expenses;
+  int catId;
+  String name;
+  double maxAmount;
+  double spentAmount;
 
-  Category({this.id, this.name, this.maxAmount, this.expenses});
+  categoryMap() {
+    var mapping = Map<String, dynamic>();
+    mapping['catId'] = catId;
+    mapping['catName'] = name;
+    mapping['maxAmount'] = maxAmount;
+    mapping['spentAmount'] = spentAmount;
+
+    return mapping;
+  }
+
 }

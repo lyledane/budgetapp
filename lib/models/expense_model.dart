@@ -1,6 +1,20 @@
 class Expense {
-  final String name;
-  final double cost;
+  int expenseId;
+  int catId;
+  String expenseName;
+  String desc;
+  double expenseCost;
+  String datePurchased;
 
-  Expense({this.name, this.cost});
+  expenseMap() {
+    var mapping = Map<String, dynamic>();
+    mapping['desc'] = desc;
+    mapping['expenseId'] = expenseId;
+    mapping['catId'] = catId;
+    mapping['expenseCost'] = expenseCost;
+    mapping['datePurchased'] = datePurchased;
+    mapping['expenseName'] = expenseName;
+
+    return mapping;
+  }
 }
